@@ -18,11 +18,11 @@ dependencies {
     compile(kotlin("stdlib-js", Versions.kotlin) )
 }
 
-//buildScan {
-//    termsOfServiceUrl = "https://gradle.com/terms-of-service"
-//    termsOfServiceAgree = "yes"
-//    publishAlways()
-//}
+buildScan {
+    termsOfServiceUrl = "https://gradle.com/terms-of-service"
+    termsOfServiceAgree = "yes"
+    publishAlways()
+}
 
 allprojects  {
 
@@ -53,4 +53,10 @@ allprojects  {
     }
 
 
+}
+
+project(":options") {
+    dependencies {
+        implementation(project(":dictionaryLib"))
+    }
 }

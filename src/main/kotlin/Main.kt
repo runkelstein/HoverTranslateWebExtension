@@ -29,8 +29,6 @@ fun selectToolbarIcon() {
 fun listenForActions() {
     browser.browserAction.onClicked.addListener {tab ->
 
-        browser.runtime.openOptionsPage()
-
         if (!isActive) {
             injectContentScript().then { sendCommandToTab(tab,"EnableTranslationPlugin") }
         } else {

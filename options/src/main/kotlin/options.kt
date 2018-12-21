@@ -1,3 +1,4 @@
+import dictionaryLib.DictCC
 import org.w3c.dom.HTMLFormElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.events.Event
@@ -37,7 +38,9 @@ fun handleAddDictionary(event : Event) {
     var reader = FileReader();
 
     reader.onload ={
-        console.log(it.target.asDynamic().result)
+
+        DictCC(it.target.asDynamic().result)
+
     }
 
     reader.readAsText(file)
