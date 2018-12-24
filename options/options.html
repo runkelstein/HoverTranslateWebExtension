@@ -3,16 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <title>settings for the Hover Translate plugin</title>
+    <link rel="stylesheet" href="options.css">
 </head>
 <body>
-<p><h3>Add dictionary from file</h3></p>
-<form id="settingsForm">
-    <!--onchange="handleFiles(this.files)"-->
-    <input type="file" id="fileInput" />
-    <input type="button" id="addDict" value="Add Dictionary" disabled/>
+<h3>Installed Dictionaries</h3>
+<form id="selectDictForm">
+<div id="dictionarList" >
+    <!-- Code inside this div will be generated from options.js -->
+</div>
+<br/>
+</form>
+<form id="addDictForm">
+    <table class="dictSettings">
+        <tr>
+            <td class="left">
+                <input type="button" id="addDict" value="Add Dictionary" disabled/>
+                <input type="file"  id="fileInput" style="max-width: 250px" />
+            </td>
+        <td class="right">
+            <input type="button" id="clearDict" value="Clear Dictionaries" alt="remove all dictionaries" />
+        </td>
+    </table>
+
+
 </form>
 <script src="build/kotlin-js-min/main/kotlin.js"></script>
-<script src="build/kotlin-js-min/main/declarations.js"/></script>
-<script src="build/kotlin-js-min/main/options.js"/></script>
+<script src="build/kotlin-js-min/main/declarations.js"></script>
+<script src="build/kotlin-js-min/main/kotlinx-html-js.js"></script>
+<script src="build/kotlin-js-min/main/kotlinx-serialization-runtime-js.js"></script>
+<script src="build/kotlin-js-min/main/core.js"></script>
+<script src="build/kotlin-js-min/main/options.js"></script>
 </body>
 </html>

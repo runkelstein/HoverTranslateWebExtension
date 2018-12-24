@@ -4,8 +4,10 @@ import notifications.CreateNotificationOptions
 import tabs.Tab
 import webextensions.browser
 import kotlin.js.Promise
+import core.utils.jsObject
 
 var isActive = false;
+
 const val CONTENT_SCRIPT_PATH = "content_script/build/kotlin-js-min/main"
 
 fun disablePlugin() {
@@ -58,6 +60,7 @@ fun injectContentScript(): Promise<Array<out Array<dynamic>?>> {
         arrayOf(
             injectContentScriptFile("kotlin.js"),
             injectContentScriptFile("declarations.js"),
+            injectContentScriptFile("core.js"),
             injectContentScriptFile("content_script.js"))
     )
 }
@@ -74,10 +77,4 @@ fun sendBrowserNotification(message : String) {
     )
 }
 
-inline fun injectContentScriptFile(fileName : String) = browser.tabs.executeScript(details = InjectDetails(file = "$CONTENT_SCRIPT_PATH/$fileName"))
-
-inline fun jsObject(init: dynamic.() -> Unit): dynamic {
-    val o = js("{}")
-    init(o)
-    return o
-}
+fun injectContentScriptFile(fileName : String) = browser.tabs.executeScript(details = InjectDetails(file = "$CONTENT_SCRIPT_PATH/$fileName"))

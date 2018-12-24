@@ -1,0 +1,45 @@
+table.dict {
+	border-width: 1px;
+	text-align: left;
+}
+
+table.dict th {
+	background-color: #7FFF8E;
+	width: 200px;
+	padding: 0px;
+}
+
+table.dict td {
+	background-color: #D1D1D1;
+}
+
+table.dict th.short {
+	width: 70px;
+}
+
+table.dict th.remove {
+	background-color: #FFFFFF
+}
+
+table.dict td.remove {
+	background-color: #FFFFFF
+}
+
+table.dictSettings {
+	border-width: 1px; 
+}
+
+table.dictSettings td {
+	padding: 0px;
+	vertical-align: top
+}
+
+td.left {
+	width:400px;
+	text-align: left; 
+}
+
+td.right {
+	width:220px;
+	text-align: right; 
+}
