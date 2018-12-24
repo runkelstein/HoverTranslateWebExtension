@@ -3,6 +3,7 @@ package core.storage
 import kotlinx.serialization.*
 import kotlinx.serialization.json.JSON
 import core.utils.jsObject
+import kotlinx.serialization.protobuf.ProtoBuf
 import webextensions.browser
 import kotlin.js.Promise
 
@@ -14,6 +15,7 @@ object StorageService {
     private inline fun List<StorageInfo>.toMap() = this.associateBy(StorageInfo::key).toMutableMap()
     private inline fun Map<String, StorageInfo>.toJSON() = JSON.stringify(StorageInfo.serializer().list,this.values.toList())
     private inline fun StorageProperties.toJSON() = JSON.stringify(StorageProperties.serializer(), this)
+    private inline fun StorageEntry.toBinaryHexString() = ProtoBuf.dumps(StorageEntry.serializer(), this)
 
     fun saveProperties(properties: StorageProperties) : Promise<*>
     {
@@ -30,7 +32,7 @@ object StorageService {
             val infoMap = it.toMap()
             infoMap[entry.info.key] = entry.info
             pair[INFO_KEY] = infoMap.toJSON()
-            pair[entry.info.key] = entry
+            pair[entry.info.key] = entry.toBinaryHexString()
         }.then {
             browser.storage.sync.set(pair)
         }
@@ -41,10 +43,27 @@ object StorageService {
         lateinit var infos : List<StorageInfo>
         lateinit var properties : StorageProperties
 
+        loadProperties()
+
         return Promise.all(arrayOf(
             loadProperties().then { properties = it },
             loadInfos().then { infos = it  }))
             .then { StorageMetadata(properties, infos) }
+    }
+
+    fun load(info: StorageInfo) : Promise<StorageEntry?>  {
+        val resultsPromise = browser.storage.sync.get(info.key)
+        return resultsPromise.then {
+            try {
+                //todo: once https://youtrack.jetbrains.com/issue/KT-29003 gets fixed
+                //we can return to JSON
+                ProtoBuf.loads(StorageEntry.serializer(), it[info.key])
+            }
+            catch(e:dynamic) {
+                console.log(e)
+                null
+            }
+        }
     }
 
     private fun loadProperties() : Promise<StorageProperties> {
@@ -54,6 +73,7 @@ object StorageService {
                 JSON.parse(StorageProperties.serializer(), it[META_DATA_KEY])
             }
             catch(e:dynamic) {
+                console.log(e)
                 StorageProperties()
             }
         }
@@ -65,6 +85,7 @@ object StorageService {
             try {
                 JSON.parse(StorageInfo.serializer().list, it[INFO_KEY]) }
             catch(e:dynamic) {
+                console.log(e)
                 ArrayList<StorageInfo>()
             }
         }

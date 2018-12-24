@@ -1,4 +1,7 @@
+import kotlinx.html.dom.create
+import kotlinx.html.p
 import webextensions.browser
+import kotlin.browser.document
 import kotlin.browser.window
 
 val overlay = Overlay()
@@ -25,17 +28,8 @@ fun main(args: Array<String>) {
 }
 
 
-fun sendCommandToBackgroundScript(cmd : String){
-    browser.runtime.sendMessage(message = jsObject {
-        command = cmd
-    });
-    console.log("Command $cmd was send to background script")
-}
 
-inline fun jsObject(init: dynamic.() -> Unit): dynamic {
-    val o = js("{}")
-    init(o)
-    return o
-}
+
+
 
 

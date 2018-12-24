@@ -1,3 +1,6 @@
 package core.storage
 
-data class StorageEntry(val info : StorageInfo, val  content: String)
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class StorageEntry( val info : StorageInfo, val  content: String)

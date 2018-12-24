@@ -1,8 +1,13 @@
-import org.w3c.dom.CaretPosition
-import org.w3c.dom.HTMLDivElement
-import org.w3c.dom.HTMLParagraphElement
+import core.dictionaryLib.SearchResult
+import kotlinx.html.*
+import kotlinx.html.dom.create
+import kotlinx.html.js.table
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.MouseEvent
+import runtime.MessageSender
+import webextensions.browser
+import kotlinx.serialization.json.JSON
+import org.w3c.dom.*
 
 import kotlin.browser.document
 
@@ -10,13 +15,14 @@ class Overlay {
 
     companion object {
         const val MOUSE_POINTER_MARGIN = 15
-        const val HEIGHT = 200;
-        const val WIDTH = 200;
+        const val HEIGHT = 300;
+        const val WIDTH = 300;
     }
 
     val mainElement = document.createElement("div") as HTMLDivElement
     val mainParagraph = document.createElement("p") as HTMLParagraphElement
 
+    var lastWord = ""
     var currentWord = ""
 
     var isVisible : Boolean = false
@@ -31,7 +37,6 @@ class Overlay {
             borderWidth = pixel(1)
             borderStyle = "solid"
             position = "absolute"
-            height =  pixel(HEIGHT)
             width = pixel(WIDTH)
         }
 
@@ -41,11 +46,58 @@ class Overlay {
     fun enable() {
         document.body!!.appendChild(mainElement)
         document.addEventListener("mousemove", ::onMouseMove)
+
+
+        browser.runtime.onMessage.addListener(::OnMessageReceived);
+    }
+
+    private fun OnMessageReceived(message: dynamic, messageSender: MessageSender, function: () -> Unit) {
+        if (message.command != "Translated") {
+            return
+        }
+
+        var result = message.data as String?;
+        if (result==null) {
+            return
+        }
+
+        mainElement.innerHTML = ""
+        var searchResult = JSON.parse(SearchResult.serializer(), result)
+
+        val table = document.createElement("table") as HTMLTableElement
+
+        with(table.style) {
+            background = "white"
+            borderColor = "black"
+            borderWidth = pixel(1)
+            borderStyle = "solid"
+            position = "absolute"
+            width = pixel(WIDTH-2)
+        }
+
+        val headRow = table.createTHead().insertRow() as HTMLTableRowElement
+        headRow.insertCell().innerHTML = "<b>Source</b>"
+        headRow.insertCell().innerHTML = "<b>Target</b>"
+
+        val body = table.createTBody()
+
+        for (translation in searchResult.results) {
+
+            val row = body.insertRow() as HTMLTableRowElement
+
+            row.insertCell().innerHTML = translation.sourceLangText
+            row.insertCell().innerHTML = translation.targetLangText
+
+        }
+
+        mainElement.appendChild(table)
+
     }
 
     fun disable() {
         document.removeEventListener("mousemove", ::onMouseMove)
         document.body!!.removeChild(mainElement)
+        browser.runtime.onMessage.removeListener(::OnMessageReceived)
     }
 
     private fun onMouseMove(event: Event)  {
@@ -57,13 +109,15 @@ class Overlay {
         mainElement.style.top = pixel(event.pageY+MOUSE_POINTER_MARGIN)
 
         var caretPosition = document.caretPositionFromPoint(event.pageX, event.pageY)
-        console.log("event.pageX: ${event.pageX}; event.pageY: ${event.pageY}")
-        console.log("event.clientX: ${event.clientX}; event.clientY: ${event.clientY}")
-        console.log("event.screenX: ${event.screenX}; event.screenY: ${event.screenY}")
+
+        lastWord = currentWord
         currentWord = extractWord(caretPosition, event)
 
         isVisible = currentWord.isWord()
-        mainParagraph.innerHTML = "<b>$currentWord</b>"
+
+        if (lastWord != currentWord) {
+            sendCommandToBackgroundScript("Translate", currentWord)
+        }
     }
 
     private fun extractWord(caretPosition: CaretPosition?, event : MouseEvent) : String {
