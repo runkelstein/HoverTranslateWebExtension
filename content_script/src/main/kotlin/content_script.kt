@@ -1,5 +1,6 @@
 import kotlinx.html.dom.create
 import kotlinx.html.p
+import kotlinx.html.stream.appendHTML
 import webextensions.browser
 import kotlin.browser.document
 import kotlin.browser.window
@@ -12,8 +13,6 @@ fun main(args: Array<String>) {
         return
     }
     window.asDynamic().hasRun = true
-
-    console.log("translation plugin installed")
 
     browser.runtime.onMessage.addListener { message,_,_ ->
 

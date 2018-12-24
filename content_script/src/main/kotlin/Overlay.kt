@@ -2,6 +2,7 @@ import core.dictionaryLib.SearchResult
 import kotlinx.html.*
 import kotlinx.html.dom.create
 import kotlinx.html.js.table
+import kotlinx.html.stream.appendHTML
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.MouseEvent
 import runtime.MessageSender
@@ -61,36 +62,33 @@ class Overlay {
             return
         }
 
-        mainElement.innerHTML = ""
         var searchResult = JSON.parse(SearchResult.serializer(), result)
+        
+        var builder = StringBuilder();
+        builder.appendHTML().table {
+                thead {
+                    tr {
+                        th { +"Source" }
+                        th { +"Target" }
+                    }
+                }
 
-        val table = document.createElement("table") as HTMLTableElement
+                tbody {
+                    for (translation in searchResult.results) {
+                        tr {
+                            td {
+                                +translation.sourceLangText
+                            }
+                            td {
+                                +translation.targetLangText
+                            }
+                        }
+                    }
+                }
+            }
 
-        with(table.style) {
-            background = "white"
-            borderColor = "black"
-            borderWidth = pixel(1)
-            borderStyle = "solid"
-            position = "absolute"
-            width = pixel(WIDTH-2)
-        }
+        mainElement.innerHTML = builder.toString()
 
-        val headRow = table.createTHead().insertRow() as HTMLTableRowElement
-        headRow.insertCell().innerHTML = "<b>Source</b>"
-        headRow.insertCell().innerHTML = "<b>Target</b>"
-
-        val body = table.createTBody()
-
-        for (translation in searchResult.results) {
-
-            val row = body.insertRow() as HTMLTableRowElement
-
-            row.insertCell().innerHTML = translation.sourceLangText
-            row.insertCell().innerHTML = translation.targetLangText
-
-        }
-
-        mainElement.appendChild(table)
 
     }
 
