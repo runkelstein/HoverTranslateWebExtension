@@ -1,6 +1,6 @@
 package core.dictionaryLib
 
-class DictCC(text : String) : Dictionary {
+class DictCC(text : String) : IDictionary {
 
     private companion object {
         const val WHITESPACE = ' '

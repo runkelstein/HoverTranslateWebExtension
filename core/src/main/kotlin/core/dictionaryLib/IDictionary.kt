@@ -1,6 +1,6 @@
 package core.dictionaryLib
 
-interface Dictionary
+interface IDictionary
 {
     val description : String
 

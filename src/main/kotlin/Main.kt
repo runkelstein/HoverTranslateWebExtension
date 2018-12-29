@@ -1,6 +1,6 @@
 import browserAction.Details3
 import core.dictionaryLib.DictCC
-import core.dictionaryLib.Dictionary
+import core.dictionaryLib.IDictionary
 import core.dictionaryLib.SearchResult
 import core.storage.StorageService
 import extensionTypes.InjectDetails
@@ -16,7 +16,7 @@ var isActive = false;
 
 const val CONTENT_SCRIPT_PATH = "content_script/build/kotlin-js-min/main"
 
-var dictionary: Dictionary? = null
+var dictionary: IDictionary? = null
 
 fun disablePlugin() {
     isActive = false

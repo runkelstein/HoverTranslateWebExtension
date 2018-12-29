@@ -41,10 +41,10 @@ allprojects  {
 
     dependencies {
         compile(kotlin("stdlib-js", Versions.kotlin))
-        compile("com.github.cypressious.kotlin-webextensions-declarations", "webextensions-declarations", Versions.kotlinWebextensions);
-        compile("org.jetbrains.kotlinx", "kotlinx-serialization-runtime-js", Versions.kotlinSerialization)
+        compile("com.github.cypressious.kotlin-webextensions-declarations", "webextensions-declarations", Versions.kotlinWebextensions)
+        compile("org.jetbrains.kotlinx", "kotlinx-serialization-runtime-js", Versions.kotlinxSerialization)
+        compile("org.jetbrains.kotlinx", "kotlinx-coroutines-core-js", Versions.kotlinxCoroutines)
     }
-
 
     tasks {
         compileKotlin2Js {
@@ -55,7 +55,6 @@ allprojects  {
         }
     }
 
-
 }
 
 project(":options") {
@@ -65,7 +64,7 @@ project(":options") {
     }
 
     dependencies {
-        compile("org.jetbrains.kotlinx","kotlinx-html-js", Versions.kotlinHtml)
+        compile("org.jetbrains.kotlinx","kotlinx-html-js", Versions.kotlinxHtml)
         implementation(project(":core"))
     }
 }
@@ -77,7 +76,7 @@ project(":content_script") {
     }
 
     dependencies {
-        compile("org.jetbrains.kotlinx","kotlinx-html-js", Versions.kotlinHtml)
+        compile("org.jetbrains.kotlinx","kotlinx-html-js", Versions.kotlinxHtml)
         implementation(project(":core"))
     }
 }
