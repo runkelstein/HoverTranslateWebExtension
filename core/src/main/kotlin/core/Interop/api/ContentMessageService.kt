@@ -1,11 +1,10 @@
 package core.Interop.api
 
-import core.Interop.commands.CommandBase
-import kotlin.js.Promise
+import core.utils.await
+import webextensions.browser
 
-class ContentMessageService : IMessageService {
-    override fun <T : CommandBase, R> send(cmd: T): Promise<R> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+object ContentMessageService : AbstractMessageService() {
+
+    override suspend fun send(message: String, targetId: Int) = browser.runtime.sendMessage(message = message).await();
 
 }
