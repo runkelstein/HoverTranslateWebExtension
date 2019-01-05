@@ -2,37 +2,54 @@ import browserAction.Details3
 import core.Interop.api.BackgroundMessageService
 import core.Interop.api.IMessageService
 import core.Interop.api.send
+import core.Interop.commands.RequestTranslationCommand
 import core.Interop.commands.SwitchPluginCommand
+import core.Interop.dto.DeferredSimpleResult
 import core.Interop.dto.ResultDto
+import core.Interop.dto.resultWithSuccess
 import core.dictionaryLib.DictCC
 import core.dictionaryLib.IDictionary
+import core.dictionaryLib.SearchResult
 import core.storage.StorageService
 import core.utils.await
 import extensionTypes.InjectDetails
 import notifications.CreateNotificationOptions
 import tabs.Tab
 import webextensions.browser
-import kotlin.js.Promise
-import core.utils.jsObject
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-
+import tabs.ActiveInfo
+import tabs.ChangeInfo
+import core.Interop.api.onReceive
 
 var isActive = false;
-
 
 const val CONTENT_SCRIPT_PATH = "content_script/build/kotlin-js-min/main"
 
 val messageService : IMessageService = BackgroundMessageService
 
+val contentInjectedTabs = HashSet<Int>();
+val pluginEnabledTabs = HashSet<Int>();
 var dictionary: IDictionary? = null
 
-fun disablePlugin() {
+fun deactivateToolbar() {
     isActive = false
     selectToolbarIcon()
 }
 
-fun enablePlugin() {
+fun enablePlugin(tabId : Int, isEnabled : Boolean) {
+    if (isEnabled) {
+        pluginEnabledTabs.add(tabId)
+        activateToolbar()
+    } else {
+        deactivateToolbar()
+        pluginEnabledTabs.remove(tabId)
+    }
+}
+
+fun isPluginEnabled(tabId : Int) = pluginEnabledTabs.contains(tabId)
+
+fun activateToolbar() {
     isActive = true
     selectToolbarIcon()
 }
@@ -45,56 +62,59 @@ fun selectToolbarIcon() {
     }
 }
 
-fun listenForActions() {
-    browser.browserAction.onClicked.addListener {tab ->
 
-        GlobalScope.launch {
+fun onToolbarButtonClicked(tab : Tab) {
+    val tabId = tab.id ?: return
 
-            injectContentScript()
-            val result = messageService.send(SwitchPluginCommand(tab.id!!, true), ResultDto::class).await()
+    GlobalScope.launch {
 
-            if (result.isSuccess) {
-                enablePlugin()
-            } else {
-                disablePlugin()
-            }
+        injectContentScript(tab)
 
-            sendBrowserNotification(result.error)
+        val isEnabled = !isPluginEnabled(tabId)
+        val result : DeferredSimpleResult = messageService.send(SwitchPluginCommand(tabId, isEnabled))
+
+        if (result.await().isSuccess) {
+            enablePlugin(tabId, isEnabled)
+        } else {
+            sendBrowserNotification(result.await().error)
         }
 
-//        if (!isActive) {
-//
-//
-//
-//                //sendMessageToTab(tab,"EnableTranslationPlugin")
-//
-//
-//            }
-//        } else {
-//            //sendMessageToTab(tab, "DisableTranslationPlugin")
-//        }
     }
-
-//    browser.runtime.onMessage.addListener { message, sender, _ ->
-//        if (message.command === "TranslationPluginEnabled") {
-//            enablePlugin()
-//        } else if (message.command === "TranslationPluginDisabled") {
-//            disablePlugin()
-//        }
-//
-//        // todo: refactor towards command based approach
-//        if (message.command == "Translate" && dictionary!=null && sender.tab!=null) {
-//            val searchResult = dictionary!!.findTranslations(message.data)
-//            sendMessageToTab(sender.tab!!, "Translated", JSON.stringify(SearchResult.serializer(), searchResult))
-//        }
-//    }
-
-//    browser.tabs.onActivated.addListener { disablePlugin() }
-//    browser.tabs.onUpdated.addListener { _,_,_ -> disablePlugin() }
 }
 
-fun main(args: Array<String>) {
+fun onTabActivated(info : ActiveInfo) {
+    if (isPluginEnabled(info.tabId)) {
+        activateToolbar()
+    } else {
+        deactivateToolbar()
+    }
+}
 
+fun onTabUpdated(tabId : Int, changeInfo : ChangeInfo, tab : Tab) {
+
+    if (changeInfo.status != "loading") {
+        return
+    }
+
+    console.log("Tab $tabId is reloading.")
+    contentInjectedTabs.remove(tabId);
+    enablePlugin(tabId, false)
+}
+
+fun addListeners() {
+    browser.browserAction.onClicked.addListener (::onToolbarButtonClicked)
+    browser.tabs.onActivated.addListener (::onTabActivated)
+    browser.tabs.onUpdated.addListener (::onTabUpdated)
+    BackgroundMessageService.onReceive(::onTranslationRequest)
+}
+
+fun onTranslationRequest(cmd : RequestTranslationCommand) : ResultDto<SearchResult> {
+    console.log("translation request received")
+    val searchResult = dictionary!!.findTranslations(cmd.searchTerm)
+    return resultWithSuccess(searchResult)
+}
+
+fun loadDictionary() {
     // todo: maybee this will look much nicer with coroutines
     StorageService.loadMetadata().then {metaData ->
         if (metaData.activated == null) {
@@ -114,27 +134,29 @@ fun main(args: Array<String>) {
 
             }
     }
-    listenForActions()
 }
 
-suspend fun injectContentScript() {
-    Promise.all(
-        arrayOf(
-            injectContentScriptFile("kotlin.js"),
-            injectContentScriptFile("declarations.js"),
-            injectContentScriptFile("kotlinx-html-js.js"),
-            injectContentScriptFile("kotlinx-serialization-runtime-js.js"),
-            injectContentScriptFile("kotlinx-coroutines-core.js"),
-            injectContentScriptFile("core.js"),
-            injectContentScriptFile("content_script.js"))).await()
+fun main(args: Array<String>) {
+    loadDictionary()
+    addListeners()
 }
 
-fun sendMessageToTab(tab: Tab, cmd : String){
-    browser.tabs.sendMessage(tab.id!!, jsObject { command = cmd })
-}
+suspend fun injectContentScript(tab :Tab) {
 
-fun sendMessageToTab(tab: Tab, cmd : String, anyData : Any){
-    browser.tabs.sendMessage(tab.id!!, jsObject { command = cmd; data = anyData })
+    if (!contentInjectedTabs.add(tab.id!!)) {
+        console.log("content scripts already injected into tab ${tab.id}")
+        return;
+    }
+
+    console.log("inject content scripts into ${tab.id}")
+
+    injectContentScriptFile(tab,"kotlin.js")
+    injectContentScriptFile(tab,"declarations.js")
+    injectContentScriptFile(tab,"kotlinx-html-js.js")
+    injectContentScriptFile(tab,"kotlinx-serialization-runtime-js.js")
+    injectContentScriptFile(tab,"kotlinx-coroutines-core.js")
+    injectContentScriptFile(tab, "core.js")
+    injectContentScriptFile(tab,"content_script.js")
 }
 
 fun sendBrowserNotification(message : String) {
@@ -145,4 +167,4 @@ fun sendBrowserNotification(message : String) {
     )
 }
 
-fun injectContentScriptFile(fileName : String) = browser.tabs.executeScript(details = InjectDetails(file = "$CONTENT_SCRIPT_PATH/$fileName"))
+suspend fun injectContentScriptFile(tab :Tab, fileName : String) = browser.tabs.executeScript(tab.id,InjectDetails(file = "$CONTENT_SCRIPT_PATH/$fileName")).await()

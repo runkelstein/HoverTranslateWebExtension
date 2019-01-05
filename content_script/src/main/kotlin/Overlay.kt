@@ -1,4 +1,12 @@
+import core.Interop.api.ContentMessageService
+import core.Interop.api.send
+import core.Interop.commands.RequestTranslationCommand
+import core.Interop.dto.ResultDto
+import core.Interop.dto.SimpleResultDto
 import core.dictionaryLib.SearchResult
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.html.*
 import kotlinx.html.dom.create
 import kotlinx.html.js.table
@@ -48,22 +56,10 @@ class Overlay {
         document.body!!.appendChild(mainElement)
         document.addEventListener("mousemove", ::onMouseMove)
 
-
-        browser.runtime.onMessage.addListener(::OnMessageReceived);
     }
 
-    private fun OnMessageReceived(message: dynamic, messageSender: MessageSender, function: () -> Unit) {
-        if (message.command != "Translated") {
-            return
-        }
+    private fun updateOverlayContent(searchResult : SearchResult) {
 
-        var result = message.data as String?;
-        if (result==null) {
-            return
-        }
-
-        var searchResult = JSON.parse(SearchResult.serializer(), result)
-        
         var builder = StringBuilder();
         builder.appendHTML().table {
                 thead {
@@ -95,7 +91,6 @@ class Overlay {
     fun disable() {
         document.removeEventListener("mousemove", ::onMouseMove)
         document.body!!.removeChild(mainElement)
-        browser.runtime.onMessage.removeListener(::OnMessageReceived)
     }
 
     private fun onMouseMove(event: Event)  {
@@ -114,7 +109,19 @@ class Overlay {
         isVisible = currentWord.isWord()
 
         if (lastWord != currentWord) {
-            sendCommandToBackgroundScript("Translate", currentWord)
+
+            lastWord = currentWord;
+
+            GlobalScope.launch {
+                val result : Deferred<ResultDto<SearchResult>> = ContentMessageService.send(RequestTranslationCommand(currentWord))
+
+                if (result.await().isSuccess) {
+                    updateOverlayContent(result.await().payload)
+                } else {
+                    console.log(result.await().error)
+                }
+
+            }
         }
     }
 

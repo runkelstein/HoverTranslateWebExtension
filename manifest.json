@@ -18,13 +18,7 @@
   },
 
   "background": {
-    "scripts": [
-      "build/kotlin-js-min/main/kotlin.js",
-      "build/kotlin-js-min/main/declarations.js",
-      "build/kotlin-js-min/main/kotlinx-serialization-runtime-js.js",
-      "build/kotlin-js-min/main/kotlinx-coroutines-core.js",
-      "build/kotlin-js-min/main/core.js",
-      "build/kotlin-js-min/main/HoverTranslateWebExtension.js"]
+    "page": "background.html"
   },
 
   "applications": {
