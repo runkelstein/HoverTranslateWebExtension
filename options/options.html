@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>settings for the Hover Translate plugin</title>
-    <link rel="stylesheet" href="options.css">
+    <link rel="stylesheet" href="pure.css">
 </head>
 <body>
 <h3>Installed Dictionaries</h3>
@@ -14,18 +14,15 @@
 <br/>
 </form>
 <form id="addDictForm">
-    <table class="dictSettings">
-        <tr>
-            <td class="left">
-                <input type="button" id="addDict" value="Add Dictionary" disabled/>
-                <input type="file"  id="fileInput" style="max-width: 250px" />
-            </td>
-        <td class="right">
-            <input type="button" id="clearDict" value="Clear Dictionaries" alt="remove all dictionaries" />
-        </td>
-    </table>
-
-
+    <div class="pure-g">
+    	<div class="pure-u-4-5">
+         	<input type="file" id="fileInput" style="max-width: 250px" />
+         	<input class="pure-button" type="button" id="addDict" value="Add Dictionary" disabled/>
+        </div>
+        <div class="pure-u-1-5" style="text-align: right">
+            <input class="pure-button button-error" type="button" id="clearDict" value="Clear Dictionaries" alt="remove all dictionaries" />
+        </div>
+    </div>
 </form>
 <script src="build/kotlin-js-min/main/kotlin.js"></script>
 <script src="build/kotlin-js-min/main/declarations.js"></script>

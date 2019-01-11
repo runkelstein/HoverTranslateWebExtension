@@ -92,6 +92,7 @@ fun activateDictionary(metadata: StorageMetadata, info: StorageInfo) {
 
     metadata.activated = info
     StorageService.saveProperties(metadata.properties)
+    initDictionaryTable(metadata)
 
 }
 
@@ -101,35 +102,45 @@ fun initDictionaryTable(metadata : StorageMetadata)
 {
     dictionaryList.innerHTML = ""
     dictionaryList.appendChild(
-        document.create.table(classes = "dict") {
+        document.create.table(classes = "pure-table pure-table-striped pure-u-1-1") {
 
             thead {
                 tr {
-                    th { +"Description" }
-                    th(classes="short") { +"File Size"}
-                    th{ +"Last Updated"}
-                    th(classes="short") { +"Activated"}
-                    th(classes="remove")
+                    th(){ +"Description" }
+                    th(){ +"File Size"}
+                    th(){ +"Last Updated"}
+                    th(){ +"Activated"}
+                    th()
                 }
             }
             tbody {
 
                 for (info in metadata.infoList) {
+
+                    var isActivated = metadata.isActivated(info);
+
                     tr {
                         td { +info.key }
                         td { +info.size.toFormatedMegaByte() }
                         td { + info.updated.toLocaleString()}
                         td {
-                            radioInput {
-                                id = "select_${info.key}"
-                                name = "select_activation"
-                                value = info.key
-                                checked = metadata.isActivated(info)
-                                onClickFunction = { activateDictionary(metadata, info) }
+                            label {
+                                radioInput {
+
+                                    id = "select_${info.key}"
+                                    name = "select_activation"
+                                    value = info.key
+                                    checked = isActivated
+                                    onClickFunction = { activateDictionary(metadata, info) }
+                                }
+                                span () {
+                                    if (isActivated) +" active" else + " inactive"
+                                }
                             }
+
                         }
-                        td(classes="remove"){
-                            buttonInput {
+                        td(){
+                            buttonInput(classes="pure-button") {
                                 id = "remove_${info.key}"
                                 value = "Remove"
                                 onClickFunction = { removeDictionary(info) }

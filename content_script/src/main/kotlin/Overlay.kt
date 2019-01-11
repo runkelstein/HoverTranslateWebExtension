@@ -6,6 +6,7 @@ import core.Interop.dto.SimpleResultDto
 import core.dictionaryLib.SearchResult
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.html.*
 import kotlinx.html.dom.create
@@ -19,6 +20,7 @@ import kotlinx.serialization.json.JSON
 import org.w3c.dom.*
 
 import kotlin.browser.document
+import kotlin.dom.addClass
 
 class Overlay {
 
@@ -28,40 +30,56 @@ class Overlay {
         const val WIDTH = 300;
     }
 
-    val mainElement = document.createElement("div") as HTMLDivElement
-    val mainParagraph = document.createElement("p") as HTMLParagraphElement
+    val mainElement = document.createElement("DIALOG") as HTMLElement
 
     var lastWord = ""
     var currentWord = ""
 
     var isVisible : Boolean = false
         set(value) {
-            mainElement.style.visibility = if (value) "visible" else "hidden"
+            if (value) {
+                mainElement.setAttribute("open","")
+            } else {
+                mainElement.removeAttribute("open")
+            }
         }
 
     init {
+
+        mainElement.addClass("pure")
         with(mainElement.style) {
             background = "white"
-            borderColor = "black"
-            borderWidth = pixel(1)
-            borderStyle = "solid"
             position = "absolute"
-            width = pixel(WIDTH)
+            border = "0"
+            padding = "0"
+            zIndex = "99999"
+            setProperty("border-radius","0.6rem")
+            setProperty("border-shadow","0 0 1em black")
+            //width = pixel(WIDTH)
         }
 
-        mainElement.appendChild(mainParagraph)
+
     }
 
     fun enable() {
         document.body!!.appendChild(mainElement)
         document.addEventListener("mousemove", ::onMouseMove)
-
     }
 
     private fun updateOverlayContent(searchResult : SearchResult) {
 
+        if (searchResult.results.isEmpty()) {
+            mainElement.innerHTML = """
+                <div style="background:darkred; padding:10px">
+                    <span style="color: white; font-weight:bold;">
+                    For the word <span style="color: yellow">${searchResult.searchTerm}</span> no translation is available
+                    </span>
+                </div>""".trimIndent()
+            return
+        }
+
         var builder = StringBuilder();
-        builder.appendHTML().table {
+        builder.appendHTML().table(classes = "pure-table pure-table-striped pure-u-1-1") {
                 thead {
                     tr {
                         th { +"Source" }
@@ -70,7 +88,9 @@ class Overlay {
                 }
 
                 tbody {
-                    for (translation in searchResult.results) {
+
+
+                    for (translation in searchResult.results.take(8)) {
                         tr {
                             td {
                                 +translation.sourceLangText
@@ -84,8 +104,6 @@ class Overlay {
             }
 
         mainElement.innerHTML = builder.toString()
-
-
     }
 
     fun disable() {
@@ -106,17 +124,27 @@ class Overlay {
         lastWord = currentWord
         currentWord = extractWord(caretPosition, event)
 
-        isVisible = currentWord.isWord()
+        isVisible = lastWord.isWord()
 
         if (lastWord != currentWord) {
 
             lastWord = currentWord;
+            mainElement.innerHTML = ""
 
             GlobalScope.launch {
+
+                val capturedWord = currentWord
+
+                delay(250) // throttle update
+                if (capturedWord != lastWord ) {
+                    return@launch
+                }
+
                 val result : Deferred<ResultDto<SearchResult>> = ContentMessageService.send(RequestTranslationCommand(currentWord))
 
                 if (result.await().isSuccess) {
-                    updateOverlayContent(result.await().payload)
+                    var payload = result.await().payload;
+                    updateOverlayContent(payload)
                 } else {
                     console.log(result.await().error)
                 }

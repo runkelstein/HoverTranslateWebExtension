@@ -9,13 +9,13 @@ val overlay = Overlay()
 
 private fun onSwitchPlugin(cmd : SwitchPluginCommand) : SimpleResultDto {
 
+    console.log("received switch plugin with value: " + cmd.isEnabled)
     if (cmd.isEnabled) {
         overlay.enable()
     } else  {
         overlay.disable()
     }
 
-    console.log("received switch plugin with value: " + cmd.isEnabled)
     return resultWithSucces()
 }
 

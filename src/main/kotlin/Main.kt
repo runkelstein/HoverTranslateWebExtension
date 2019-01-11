@@ -25,12 +25,13 @@ import core.Interop.api.onReceive
 var isActive = false;
 
 const val CONTENT_SCRIPT_PATH = "content_script/build/kotlin-js-min/main"
+const val CSS_PATH = "options"
 
 val messageService : IMessageService = BackgroundMessageService
 
 val contentInjectedTabs = HashSet<Int>();
 val pluginEnabledTabs = HashSet<Int>();
-var dictionary: IDictionary? = null
+lateinit var dictionary: IDictionary
 
 fun deactivateToolbar() {
     isActive = false
@@ -110,12 +111,12 @@ fun addListeners() {
 
 fun onTranslationRequest(cmd : RequestTranslationCommand) : ResultDto<SearchResult> {
     console.log("translation request received")
-    val searchResult = dictionary!!.findTranslations(cmd.searchTerm)
+    val searchResult = dictionary.findTranslations(cmd.searchTerm)
     return resultWithSuccess(searchResult)
 }
 
 fun loadDictionary() {
-    // todo: maybee this will look much nicer with coroutines
+
     StorageService.loadMetadata().then {metaData ->
         if (metaData.activated == null) {
             return@then
@@ -126,7 +127,7 @@ fun loadDictionary() {
 
                 if (it!=null) {
                     dictionary = DictCC(it.content)
-                    val testWord = dictionary!!.findTranslations("vacanza")
+                    val testWord = dictionary.findTranslations("vacanza")
                     sendBrowserNotification("Dictionary initialized: " + testWord.results.first().targetLangText)
                 } else {
                     sendBrowserNotification("Dictionary not initialized: ")
@@ -150,6 +151,9 @@ suspend fun injectContentScript(tab :Tab) {
 
     console.log("inject content scripts into ${tab.id}")
 
+    injectCss(tab, "pure-base-context.css")
+    injectCss(tab, "pure-grids.css")
+    injectCss(tab, "pure-tables.css")
     injectContentScriptFile(tab,"kotlin.js")
     injectContentScriptFile(tab,"declarations.js")
     injectContentScriptFile(tab,"kotlinx-html-js.js")
@@ -167,4 +171,8 @@ fun sendBrowserNotification(message : String) {
     )
 }
 
-suspend fun injectContentScriptFile(tab :Tab, fileName : String) = browser.tabs.executeScript(tab.id,InjectDetails(file = "$CONTENT_SCRIPT_PATH/$fileName")).await()
+suspend fun injectContentScriptFile(tab :Tab, fileName : String)
+        = browser.tabs.executeScript(tab.id,InjectDetails(file = "$CONTENT_SCRIPT_PATH/$fileName")).await()
+
+suspend fun injectCss(tab :Tab, fileName : String)
+        = browser.tabs.insertCSS(tab.id, InjectDetails(file ="$CSS_PATH/$fileName")).await()

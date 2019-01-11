@@ -20,6 +20,7 @@ class DictCC(text : String) : IDictionary {
         val contentLines = text.lineSequence()
             .filterNot { it.isEmpty() || SKIPELINECHARS.contains(it[0]) }
 
+        // fill dictionary
         for (line in contentLines) {
             val key = line.substringBefore(WHITESPACE)
 
@@ -28,6 +29,13 @@ class DictCC(text : String) : IDictionary {
 
             content.getOrPut(key) { ArrayList() }
                 .add(Translation(sourceLangText, targetLangText))
+        }
+
+        // sort dictionary
+        for (entry in content) {
+            entry.value.sortWith(Comparator { a, b ->
+                if (a.sourceLangText.length < b.sourceLangText.length) 0 else 1
+            })
         }
     }
 
