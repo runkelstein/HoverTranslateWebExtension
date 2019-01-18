@@ -1,4 +1,4 @@
-package core.Interop.commands
+package com.inspiritious.HoverTranslateWebExtension.core.Interop.commands
 
 import kotlinx.serialization.Serializable
 

@@ -16,4 +16,4 @@ pluginManagement {
     }
 }
 rootProject.name = 'HoverTranslateWebExtension'
-include('core','options', 'content_script')
+include('core','options', 'background_script', 'content_script')

@@ -1,4 +1,4 @@
-package core.utils
+package com.inspiritious.HoverTranslateWebExtension.core.utils
 
 external object Object {
 

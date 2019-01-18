@@ -1,8 +1,8 @@
-package core.storage
+package com.inspiritious.HoverTranslateWebExtension.core.storage
 
 import kotlinx.serialization.*
 import kotlinx.serialization.json.JSON
-import core.utils.jsObject
+import com.inspiritious.HoverTranslateWebExtension.core.utils.jsObject
 import kotlinx.serialization.protobuf.ProtoBuf
 import webextensions.browser
 import kotlin.js.Promise

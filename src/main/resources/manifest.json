@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Hover Translate Web Extension",
+  "version": "1.0",
+  "description": "Translates single words by hovering over them",
+  "permissions": [
+    "activeTab","notifications", "storage"
+  ],
+
+  "browser_action": {
+    "default_icon": "icons/hoverTranslate128.png",
+    "default_title": "Enable Hover Translate"
+  },
+
+  "options_ui": {
+    "page": "options/options.html",
+    "browser_style": true
+  },
+
+  "background": {
+    "page": "background_script/background.html"
+  },
+
+  "applications": {
+    "gecko": {
+      "id": "HoverTranslate@mozilla.org"
+    }
+  }
+}

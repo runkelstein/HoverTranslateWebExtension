@@ -1,4 +1,4 @@
-package core.utils
+package com.inspiritious.HoverTranslateWebExtension.core.utils
 
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException

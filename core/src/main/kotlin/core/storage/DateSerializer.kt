@@ -1,4 +1,4 @@
-package core.storage
+package com.inspiritious.HoverTranslateWebExtension.core.storage
 
 import kotlinx.serialization.*
 import kotlinx.serialization.internal.StringDescriptor

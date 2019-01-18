@@ -1,4 +1,4 @@
-
+package com.inspiritious.HoverTranslateWebExtension.content_script
 // here we put all general purpose extension functions concerning Strings import kotlin.text.*
 
 private val wordDelimiters = charArrayOf(' ', ',', '.', ';', '?', '‘', '’', '\'', '"', '`', '´', '(', ')')

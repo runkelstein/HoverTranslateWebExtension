@@ -1,4 +1,4 @@
-package core.Interop.dto
+package com.inspiritious.HoverTranslateWebExtension.core.Interop.dto
 
 import kotlinx.coroutines.Deferred
 import kotlinx.serialization.Serializable

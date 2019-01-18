@@ -1,4 +1,4 @@
-package core.storage
+package com.inspiritious.HoverTranslateWebExtension.core.storage
 
 data class StorageMetadata(
     val properties : StorageProperties,

@@ -1,22 +1,18 @@
-import core.Interop.api.ContentMessageService
-import core.Interop.api.send
-import core.Interop.commands.RequestTranslationCommand
-import core.Interop.dto.ResultDto
-import core.Interop.dto.SimpleResultDto
-import core.dictionaryLib.SearchResult
+package com.inspiritious.HoverTranslateWebExtension.content_script
+
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.api.ContentMessageService
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.api.send
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.commands.RequestTranslationCommand
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.dto.ResultDto
+import com.inspiritious.HoverTranslateWebExtension.core.dictionaryLib.SearchResult
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.html.*
-import kotlinx.html.dom.create
-import kotlinx.html.js.table
 import kotlinx.html.stream.appendHTML
 import org.w3c.dom.events.Event
 import org.w3c.dom.events.MouseEvent
-import runtime.MessageSender
-import webextensions.browser
-import kotlinx.serialization.json.JSON
 import org.w3c.dom.*
 
 import kotlin.browser.document

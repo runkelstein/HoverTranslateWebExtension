@@ -1,8 +1,10 @@
-import core.Interop.api.ContentMessageService
-import core.Interop.api.onReceive
-import core.Interop.commands.SwitchPluginCommand
-import core.Interop.dto.resultWithSucces
-import core.Interop.dto.SimpleResultDto
+package com.inspiritious.HoverTranslateWebExtension.content_script
+
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.api.ContentMessageService
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.api.onReceive
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.commands.SwitchPluginCommand
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.dto.resultWithSucces
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.dto.SimpleResultDto
 import kotlin.browser.window
 
 val overlay = Overlay()

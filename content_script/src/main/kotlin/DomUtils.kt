@@ -1,3 +1,5 @@
+package com.inspiritious.HoverTranslateWebExtension.content_script
+
 import org.w3c.dom.CaretPosition
 import org.w3c.dom.DOMRect
 

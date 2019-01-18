@@ -1,7 +1,7 @@
-package core.Interop.api
+package com.inspiritious.HoverTranslateWebExtension.core.Interop.api
 
-import core.Interop.commands.CommandBase
-import core.Interop.dto.ResultDto
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.commands.CommandBase
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.dto.ResultDto
 import kotlinx.coroutines.Deferred
 import kotlin.reflect.KClass
 

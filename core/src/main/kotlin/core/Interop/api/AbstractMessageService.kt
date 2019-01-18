@@ -1,8 +1,8 @@
-package core.Interop.api
+package com.inspiritious.HoverTranslateWebExtension.core.Interop.api
 
-import core.Interop.commands.CommandBase
-import core.Interop.dto.ResultDto
-import core.utils.jsObject
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.commands.CommandBase
+import com.inspiritious.HoverTranslateWebExtension.core.Interop.dto.ResultDto
+import com.inspiritious.HoverTranslateWebExtension.core.utils.jsObject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.serialization.ImplicitReflectionSerializer

@@ -1,8 +1,8 @@
-import core.dictionaryLib.DictCC
-import core.storage.StorageEntry
-import core.storage.StorageInfo
-import core.storage.StorageMetadata
-import core.storage.StorageService
+import com.inspiritious.HoverTranslateWebExtension.core.dictionaryLib.DictCC
+import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageEntry
+import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageInfo
+import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageMetadata
+import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageService
 import kotlinx.html.*
 import kotlinx.html.dom.create
 import kotlinx.html.js.onClickFunction

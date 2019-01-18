@@ -1,4 +1,4 @@
-package core.dictionaryLib
+package com.inspiritious.HoverTranslateWebExtension.core.dictionaryLib
 
 import kotlinx.serialization.Serializable
 

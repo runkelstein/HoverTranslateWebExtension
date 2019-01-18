@@ -1,6 +1,6 @@
-package core.Interop.api
+package com.inspiritious.HoverTranslateWebExtension.core.Interop.api
 
-import core.utils.await
+import com.inspiritious.HoverTranslateWebExtension.core.utils.await
 import webextensions.browser
 
 object ContentMessageService : AbstractMessageService() {

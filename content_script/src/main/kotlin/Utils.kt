@@ -1,4 +1,6 @@
-import core.utils.jsObject
+package com.inspiritious.HoverTranslateWebExtension.content_script
+
+import com.inspiritious.HoverTranslateWebExtension.core.utils.jsObject
 import webextensions.browser
 
 fun sendCommandToBackgroundScript(cmd : String){

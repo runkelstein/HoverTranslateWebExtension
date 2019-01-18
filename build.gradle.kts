@@ -1,4 +1,4 @@
-group = "com.inspiritious"
+group = "com.inspiritious.HoverTranslateWebExtension"
 version = "1.0-SNAPSHOT"
 
 plugins {
@@ -13,10 +13,6 @@ repositories {
     maven("https://www.jitpack.io")
 }
 
-dependencies {
-    compile(kotlin("stdlib-js", Versions.kotlin) )
-    implementation(project(":core"))
-}
 
 buildScan {
     termsOfServiceUrl = "https://gradle.com/terms-of-service"
@@ -24,7 +20,13 @@ buildScan {
     publishAlways()
 }
 
-allprojects  {
+apply {
+    plugin("kotlin-dce-js")
+    plugin("kotlin2js")
+    plugin("webExtension")
+}
+
+subprojects  {
 
     apply {
         plugin("kotlin-dce-js")
@@ -57,7 +59,12 @@ allprojects  {
 
 }
 
+
 project(":options") {
+
+    apply {
+        plugin("webExtension")
+    }
 
     repositories {
         jcenter()
@@ -70,6 +77,26 @@ project(":options") {
 }
 
 project(":content_script") {
+
+    apply {
+        plugin("webExtension")
+    }
+
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        compile("org.jetbrains.kotlinx","kotlinx-html-js", Versions.kotlinxHtml)
+        implementation(project(":core"))
+    }
+}
+
+project(":background_script") {
+
+    apply {
+        plugin("webExtension")
+    }
 
     repositories {
         jcenter()
