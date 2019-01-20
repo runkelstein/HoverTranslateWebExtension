@@ -1,3 +1,5 @@
+import com.inspiritious.HoverTranslateWebExtension.*
+
 group = "com.inspiritious.HoverTranslateWebExtension"
 version = "1.0-SNAPSHOT"
 
@@ -13,7 +15,6 @@ repositories {
     maven("https://www.jitpack.io")
 }
 
-
 buildScan {
     termsOfServiceUrl = "https://gradle.com/terms-of-service"
     termsOfServiceAgree = "yes"
@@ -23,7 +24,6 @@ buildScan {
 apply {
     plugin("kotlin-dce-js")
     plugin("kotlin2js")
-    plugin("webExtension")
 }
 
 subprojects  {
@@ -59,51 +59,24 @@ subprojects  {
 
 }
 
+allprojects {
 
-project(":options") {
+    val modules = setOf("background_script", "content_script", "options")
 
-    apply {
-        plugin("webExtension")
+    if (name in modules || isRoot()) {
+        apply<WebExtensionPlugin>();
+        configure<WebExtension> { outputDir = "out" }
     }
 
-    repositories {
-        jcenter()
+    if (name in modules) {
+        repositories {
+            jcenter()
+        }
+
+        dependencies {
+            compile("org.jetbrains.kotlinx","kotlinx-html-js", Versions.kotlinxHtml)
+            implementation(project(":core"))
+        }
     }
 
-    dependencies {
-        compile("org.jetbrains.kotlinx","kotlinx-html-js", Versions.kotlinxHtml)
-        implementation(project(":core"))
-    }
-}
-
-project(":content_script") {
-
-    apply {
-        plugin("webExtension")
-    }
-
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        compile("org.jetbrains.kotlinx","kotlinx-html-js", Versions.kotlinxHtml)
-        implementation(project(":core"))
-    }
-}
-
-project(":background_script") {
-
-    apply {
-        plugin("webExtension")
-    }
-
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        compile("org.jetbrains.kotlinx","kotlinx-html-js", Versions.kotlinxHtml)
-        implementation(project(":core"))
-    }
 }

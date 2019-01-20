@@ -13,7 +13,7 @@ open class WebExtensionTask : DefaultTask() {
     @Input
     var outputDir = "out";
 
-    fun Project.isRoot() = this.rootProject.name == this.name
+
 
     @TaskAction
     fun run()
@@ -25,29 +25,25 @@ open class WebExtensionTask : DefaultTask() {
         val projectName = if (project.isRoot()) "" else project.name
 
         // copy script files
-        project.copy({
+        project.copy {
             from(project.buildDir.path + "/kotlin-js-min/main") {
                 include("*.js")
             }
 
             into("$rootPath/$outputDir/$projectName")
-        })
+        }
 
         // copy resources
-        project.copy({
+        project.copy {
             from(project.projectDir.path + "/src/main/resources") {
                 include("*")
                 include("*/*")
             }
 
             into("$rootPath/$outputDir/$projectName")
-        })
-
-
+        }
 
         logger.lifecycle("Finish build.")
-
-
     }
 
 }

@@ -27,8 +27,8 @@ import com.inspiritious.HoverTranslateWebExtension.core.Interop.api.onReceive
 var isActive = false;
 
 const val CONTENT_SCRIPT_PATH = "../content_script"
-const val CSS_PATH = "../options"
-const val ICONS_PATH = "../icons"
+const val CSS_PATH = "../css"
+const val ICONS_PATH = "../img"
 
 val messageService : IMessageService = BackgroundMessageService
 
@@ -60,9 +60,9 @@ fun activateToolbar() {
 
 fun selectToolbarIcon() {
     if (isActive) {
-        browser.browserAction.setIcon(Details3(path = "$ICONS_PATH/hoverTranslate128_active.png"))
+        browser.browserAction.setIcon(Details3(path = "$ICONS_PATH/icon_128x128_toolbar_active.png"))
     } else {
-        browser.browserAction.setIcon(Details3(path = "$ICONS_PATH/hoverTranslate128.png"))
+        browser.browserAction.setIcon(Details3(path = "$ICONS_PATH/icon_128x128_toolbar.png"))
     }
 }
 
@@ -154,16 +154,10 @@ suspend fun injectContentScript(tab :Tab) {
 
     console.log("inject content scripts into ${tab.id}")
 
-    injectCss(tab, "pure-base-context.css")
-    injectCss(tab, "pure-grids.css")
-    injectCss(tab, "pure-tables.css")
-    injectContentScriptFile(tab,"kotlin.js")
-    injectContentScriptFile(tab,"declarations.js")
-    injectContentScriptFile(tab,"kotlinx-html-js.js")
-    injectContentScriptFile(tab,"kotlinx-serialization-runtime-js.js")
-    injectContentScriptFile(tab,"kotlinx-coroutines-core.js")
-    injectContentScriptFile(tab, "core.js")
-    injectContentScriptFile(tab,"content_script.js")
+    injectCss(tab, "pure-base-context.css", "pure-grids.css", "pure-tables.css")
+    injectContentScriptFile(tab,"kotlin.js", "declarations.js",
+        "kotlinx-html-js.js","kotlinx-serialization-runtime-js.js","kotlinx-coroutines-core.js",
+        "core.js","content_script.js")
 }
 
 fun sendBrowserNotification(message : String) {
@@ -174,8 +168,8 @@ fun sendBrowserNotification(message : String) {
     )
 }
 
-suspend fun injectContentScriptFile(tab :Tab, fileName : String)
-        = browser.tabs.executeScript(tab.id,InjectDetails(file = "$CONTENT_SCRIPT_PATH/$fileName")).await()
+suspend fun injectContentScriptFile(tab :Tab, vararg fileNames : String)
+        = fileNames.forEach {  browser.tabs.executeScript(tab.id,InjectDetails(file = "$CONTENT_SCRIPT_PATH/$it")).await() }
 
-suspend fun injectCss(tab :Tab, fileName : String)
-        = browser.tabs.insertCSS(tab.id, InjectDetails(file ="$CSS_PATH/$fileName")).await()
+suspend fun injectCss(tab :Tab, vararg fileNames : String)
+        = fileNames.forEach { browser.tabs.insertCSS(tab.id, InjectDetails(file ="$CSS_PATH/$it")).await()}
