@@ -3,6 +3,8 @@ import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageEntry
 import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageInfo
 import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageMetadata
 import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageService
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.html.*
 import kotlinx.html.dom.create
 import kotlinx.html.js.onClickFunction
@@ -53,13 +55,13 @@ fun handleAddDictionary(event : Event) {
     addDictForm.reset()
 }
 
-fun onFileLoaded(event :Event) {
+fun onFileLoaded(event :Event) = GlobalScope.launch {
 
     val content = event.target.asDynamic().result
     val dict = DictCC(content)
 
     StorageService.saveEntry(StorageEntry(StorageInfo(dict.description, content.length, Date()), content))
-        .then { refreshDictionaryTable() }
+    refreshDictionaryTable()
 }
 
 fun main(args: Array<String>) {
@@ -67,28 +69,28 @@ fun main(args: Array<String>) {
     fileInput.onchange = ::handleFileSelectionChanged
     addDictButton.onclick = ::handleAddDictionary
     clearDictButton.onclick = ::handleClearDictionaries
-    refreshDictionaryTable()
-}
 
-fun handleClearDictionaries(event: Event) {
-    StorageService.clear().then { refreshDictionaryTable()  }
-}
-
-fun refreshDictionaryTable() {
-
-    StorageService.loadMetadata().then {
-        initDictionaryTable(it)
-    }
-
-}
-
-fun removeDictionary(info : StorageInfo) {
-    StorageService.remove(info).then {
+    GlobalScope.launch {
         refreshDictionaryTable()
     }
 }
 
-fun activateDictionary(metadata: StorageMetadata, info: StorageInfo) {
+fun handleClearDictionaries(event: Event) = GlobalScope.launch {
+    StorageService.clear()
+    refreshDictionaryTable()
+}
+
+suspend fun refreshDictionaryTable() {
+    val metadata = StorageService.loadMetadata()
+    initDictionaryTable(metadata)
+}
+
+fun removeDictionary(info : StorageInfo) = GlobalScope.launch {
+    StorageService.remove(info)
+    refreshDictionaryTable()
+}
+
+fun activateDictionary(metadata: StorageMetadata, info: StorageInfo) = GlobalScope.launch {
 
     metadata.activated = info
     StorageService.saveProperties(metadata.properties)
@@ -106,10 +108,10 @@ fun initDictionaryTable(metadata : StorageMetadata)
 
             thead {
                 tr {
-                    th(){ +"Description" }
-                    th(){ +"File Size"}
-                    th(){ +"Last Updated"}
-                    th(){ +"Activated"}
+                    th{ +"Description" }
+                    th{ +"File Size"}
+                    th{ +"Last Updated"}
+                    th{ +"Activated"}
                     th()
                 }
             }
@@ -139,7 +141,7 @@ fun initDictionaryTable(metadata : StorageMetadata)
                             }
 
                         }
-                        td(){
+                        td{
                             buttonInput(classes="pure-button") {
                                 id = "remove_${info.key}"
                                 value = "Remove"

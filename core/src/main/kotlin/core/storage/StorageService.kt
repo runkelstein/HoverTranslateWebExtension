@@ -3,110 +3,98 @@ package com.inspiritious.HoverTranslateWebExtension.core.storage
 import kotlinx.serialization.*
 import kotlinx.serialization.json.JSON
 import com.inspiritious.HoverTranslateWebExtension.core.utils.jsObject
+
+import kotlinx.coroutines.await
 import kotlinx.serialization.protobuf.ProtoBuf
 import webextensions.browser
-import kotlin.js.Promise
 
 object StorageService {
 
-    const val INFO_KEY = "StorageInfos";
-    const val META_DATA_KEY ="StorageMetaData"
+    private const val INFO_KEY = "StorageInfos";
+    private const val META_DATA_KEY ="StorageMetaData"
 
     private inline fun List<StorageInfo>.toMap() = this.associateBy(StorageInfo::key).toMutableMap()
     private inline fun Map<String, StorageInfo>.toJSON() = JSON.stringify(StorageInfo.serializer().list,this.values.toList())
     private inline fun StorageProperties.toJSON() = JSON.stringify(StorageProperties.serializer(), this)
     private inline fun StorageEntry.toBinaryHexString() = ProtoBuf.dumps(StorageEntry.serializer(), this)
 
-    fun saveProperties(properties: StorageProperties) : Promise<*>
+    suspend fun saveProperties(properties: StorageProperties)
     {
         val pair = jsObject()
         pair[META_DATA_KEY] = properties.toJSON()
-        return browser.storage.sync.set(pair)
+        browser.storage.sync.set(pair).await()
     }
 
-    fun saveEntry(entry: StorageEntry): Promise<*> {
+    suspend fun saveEntry(entry: StorageEntry) {
 
         val pair = jsObject()
+        val infoMap = loadInfos().toMap()
 
-        return loadInfos().then {
-            val infoMap = it.toMap()
-            infoMap[entry.info.key] = entry.info
-            pair[INFO_KEY] = infoMap.toJSON()
-            pair[entry.info.key] = entry.toBinaryHexString()
-        }.then {
-            browser.storage.sync.set(pair)
+        infoMap[entry.info.key] = entry.info
+        pair[INFO_KEY] = infoMap.toJSON()
+        pair[entry.info.key] = entry.toBinaryHexString()
+
+        browser.storage.sync.set(pair).await()
+    }
+
+    suspend fun loadMetadata() : StorageMetadata {
+
+        val properties = loadProperties()
+        val infos = loadInfos()
+
+        return StorageMetadata(properties, infos)
+    }
+
+    suspend fun load(info: StorageInfo) : StorageEntry? {
+
+        val results = browser.storage.sync.get(info.key).await()
+        return try {
+            //todo: once https://youtrack.jetbrains.com/issue/KT-29003 gets fixed we can return to JSON
+            ProtoBuf.loads(StorageEntry.serializer(), results[info.key])
+        } catch (e: dynamic) {
+            console.log(e)
+            null
         }
     }
 
-    fun loadMetadata() : Promise<StorageMetadata> {
+    private suspend fun loadProperties() : StorageProperties {
 
-        lateinit var infos : List<StorageInfo>
-        lateinit var properties : StorageProperties
+        val result = browser.storage.sync.get(META_DATA_KEY).await()
 
-        loadProperties()
-
-        return Promise.all(arrayOf(
-            loadProperties().then { properties = it },
-            loadInfos().then { infos = it  }))
-            .then { StorageMetadata(properties, infos) }
-    }
-
-    fun load(info: StorageInfo) : Promise<StorageEntry?>  {
-        val resultsPromise = browser.storage.sync.get(info.key)
-        return resultsPromise.then {
-            try {
-                //todo: once https://youtrack.jetbrains.com/issue/KT-29003 gets fixed
-                //we can return to JSON
-                ProtoBuf.loads(StorageEntry.serializer(), it[info.key])
-            }
-            catch(e:dynamic) {
-                console.log(e)
-                null
-            }
+        return try {
+            JSON.parse(StorageProperties.serializer(), result[META_DATA_KEY])
+        } catch(e:dynamic) {
+            console.log(e)
+            StorageProperties()
         }
     }
 
-    private fun loadProperties() : Promise<StorageProperties> {
-        val resultsPromise = browser.storage.sync.get(META_DATA_KEY)
-        return resultsPromise.then {
-            try {
-                JSON.parse(StorageProperties.serializer(), it[META_DATA_KEY])
-            }
-            catch(e:dynamic) {
-                console.log(e)
-                StorageProperties()
-            }
-        }
-    }
+    private suspend fun loadInfos(): List<StorageInfo> {
 
-    private fun loadInfos(): Promise<List<StorageInfo>> {
         val resultsPromise = browser.storage.sync.get(INFO_KEY)
-        return resultsPromise.then {
-            try {
-                JSON.parse(StorageInfo.serializer().list, it[INFO_KEY]) }
-            catch(e:dynamic) {
-                console.log(e)
-                ArrayList<StorageInfo>()
-            }
+        val items = resultsPromise.await()
+
+        return try {
+            JSON.parse(StorageInfo.serializer().list, items[INFO_KEY])
+        } catch(e:dynamic) {
+            console.log(e)
+            ArrayList()
         }
+
     }
 
-    fun remove(info : StorageInfo) : Promise<*>
+    suspend fun remove(info : StorageInfo)
     {
         val pair = jsObject()
 
-        return loadInfos().then {
-            val infoMap = it.toMap()
-            infoMap.remove(info.key)
-            pair[INFO_KEY] = infoMap.toJSON()
-        }.then {
-            browser.storage.sync.set(pair)
-            browser.storage.sync.remove(info.key)
-        }
+        val infoMap = loadInfos().toMap()
+        infoMap.remove(info.key)
+        pair[INFO_KEY] = infoMap.toJSON()
+
+        browser.storage.sync.set(pair).await()
+        browser.storage.sync.remove(info.key).await()
     }
 
-    fun clear(): Promise<*> {
-        return browser.storage.sync.clear()
-    }
+    suspend fun clear() = browser.storage.sync.clear().await()
 
 }

@@ -22,7 +22,7 @@ class DictCC(text : String) : IDictionary {
 
         // fill dictionary
         for (line in contentLines) {
-            val key = line.substringBefore(WHITESPACE)
+            val key = line.substringBefore(WHITESPACE).substringBefore(TABULATOR)
 
             val sourceLangText = line.substringBefore(TABULATOR)
             val targetLangText = line.substringAfter(TABULATOR).substringBefore(TABULATOR)

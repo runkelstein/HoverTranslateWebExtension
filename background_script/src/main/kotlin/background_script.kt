@@ -118,26 +118,23 @@ fun onTranslationRequest(cmd : RequestTranslationCommand) : ResultDto<SearchResu
     return resultWithSuccess(searchResult)
 }
 
-fun loadDictionary() {
+fun loadDictionary() = GlobalScope.launch {
 
-    StorageService.loadMetadata().then {metaData ->
-        if (metaData.activated == null) {
-            return@then
-        }
 
-        StorageService.load(metaData.activated!!)
-            .then {
-
-                if (it!=null) {
-                    dictionary = DictCC(it.content)
-                    val testWord = dictionary.findTranslations("vacanza")
-                    sendBrowserNotification("Dictionary initialized: " + testWord.results.first().targetLangText)
-                } else {
-                    sendBrowserNotification("Dictionary not initialized: ")
-                }
-
-            }
+    val metaData = StorageService.loadMetadata()
+    if (metaData.activated == null) {
+        return@launch
     }
+
+    val entry = StorageService.load(metaData.activated!!);
+    if (entry!=null) {
+        dictionary = DictCC(entry.content)
+        val testWord = dictionary.findTranslations("vacanza")
+        sendBrowserNotification("Dictionary initialized: " + testWord.results.first().targetLangText)
+    } else {
+        sendBrowserNotification("Dictionary not initialized: ")
+    }
+
 }
 
 fun main(args: Array<String>) {

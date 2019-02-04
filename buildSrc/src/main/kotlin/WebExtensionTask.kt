@@ -1,18 +1,13 @@
 package com.inspiritious.HoverTranslateWebExtension
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.Project
-import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-import java.io.File
-import org.gradle.kotlin.dsl.*
 
 open class WebExtensionTask : DefaultTask() {
 
     @Input
-    var outputDir = "out";
-
+    var outputDir = "out"
 
 
     @TaskAction
