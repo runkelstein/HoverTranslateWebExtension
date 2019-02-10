@@ -1,11 +1,13 @@
 package com.inspiritious.HoverTranslateWebExtension.core.dictionaryLib
 
+import core.dictionaryLib.DictOriginType
+
 class DictCC(text : String) : IDictionary {
 
     private companion object {
         const val WHITESPACE = ' '
         const val TABULATOR = '\t'
-        val SKIPELINECHARS = charArrayOf('#','(')
+        val SKIPLINECHARS = charArrayOf('#','(')
     }
 
     private val content : MutableMap<String, MutableList<Translation>> = HashMap()
@@ -18,7 +20,7 @@ class DictCC(text : String) : IDictionary {
     init {
 
         val contentLines = text.lineSequence()
-            .filterNot { it.isEmpty() || SKIPELINECHARS.contains(it[0]) }
+            .filterNot { it.isEmpty() || SKIPLINECHARS.contains(it[0]) }
 
         // fill dictionary
         for (line in contentLines) {
@@ -42,6 +44,6 @@ class DictCC(text : String) : IDictionary {
     override fun findTranslations(word: String): SearchResult
     {
         val results = content[word]?.toList() ?: ArrayList()
-        return SearchResult(word, results)
+        return SearchResult(word, results, DictOriginType.DictCC)
     }
 }

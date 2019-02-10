@@ -1,8 +1,11 @@
+import com.inspiritious.HoverTranslateWebExtension.core.cloud.yandex.YandexService
 import com.inspiritious.HoverTranslateWebExtension.core.dictionaryLib.DictCC
 import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageEntry
 import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageInfo
 import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageMetadata
 import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageService
+import core.cloud.yandex.model.LanguageChoices
+import core.storage.YandexSettings
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.html.*
@@ -26,6 +29,7 @@ val addDictButton = document.getElementById("addDict") as HTMLInputElement
 val clearDictButton = document.getElementById("clearDict") as HTMLInputElement
 val fileInput = document.getElementById("fileInput") as HTMLInputElement
 val dictionaryList = document.getElementById("dictionarList") as HTMLDivElement
+val yandexChoice = document.getElementById("yandexChoice") as HTMLDivElement
 
 var dictFile : File? = null
 
@@ -34,7 +38,7 @@ fun handleFileSelectionChanged(event : Event)
     val files = event.target?.asDynamic().files as FileList?;
     if (files == null) {
         console.log("not file list")
-        return;
+        return
     }
 
     dictFile = files[0];
@@ -64,16 +68,19 @@ fun onFileLoaded(event :Event) = GlobalScope.launch {
     refreshDictionaryTable()
 }
 
-fun main(args: Array<String>) {
+ fun main(args: Array<String>) {
     console.log("options loaded")
+
     fileInput.onchange = ::handleFileSelectionChanged
     addDictButton.onclick = ::handleAddDictionary
     clearDictButton.onclick = ::handleClearDictionaries
 
     GlobalScope.launch {
         refreshDictionaryTable()
+        refreshYandexChoiceForm()
     }
 }
+
 
 fun handleClearDictionaries(event: Event) = GlobalScope.launch {
     StorageService.clear()
@@ -85,16 +92,40 @@ suspend fun refreshDictionaryTable() {
     initDictionaryTable(metadata)
 }
 
+suspend fun refreshYandexChoiceForm() {
+
+    val yandexResult = YandexService.getLanguages()
+    val metadata = StorageService.loadMetadata()
+
+    if (yandexResult.isSuccess) {
+        initYandexChoiceForm(yandexResult.languages, metadata.properties.yandex)
+    }
+
+
+}
+
 fun removeDictionary(info : StorageInfo) = GlobalScope.launch {
     StorageService.remove(info)
     refreshDictionaryTable()
 }
 
-fun activateDictionary(metadata: StorageMetadata, info: StorageInfo) = GlobalScope.launch {
+fun activateDictionary(info: StorageInfo) = GlobalScope.launch {
 
+    val metadata = StorageService.loadMetadata()
     metadata.activated = info
     StorageService.saveProperties(metadata.properties)
     initDictionaryTable(metadata)
+
+}
+
+fun updateYandexSettings(settings : YandexSettings) = GlobalScope.launch {
+
+    val metadata = StorageService.loadMetadata()
+    console.log(settings)
+    metadata.properties.yandex = settings
+    console.log(settings)
+    StorageService.saveProperties(metadata.properties)
+
 
 }
 
@@ -124,7 +155,7 @@ fun initDictionaryTable(metadata : StorageMetadata)
                     tr {
                         td { +info.key }
                         td { +info.size.toFormatedMegaByte() }
-                        td { + info.updated.toLocaleString()}
+                        td { +info.updated.toLocaleString()}
                         td {
                             label {
                                 radioInput {
@@ -133,7 +164,7 @@ fun initDictionaryTable(metadata : StorageMetadata)
                                     name = "select_activation"
                                     value = info.key
                                     checked = isActivated
-                                    onClickFunction = { activateDictionary(metadata, info) }
+                                    onClickFunction = { activateDictionary(info) }
                                 }
                                 span () {
                                     if (isActivated) +" active" else + " inactive"
@@ -142,7 +173,7 @@ fun initDictionaryTable(metadata : StorageMetadata)
 
                         }
                         td{
-                            buttonInput(classes="pure-button") {
+                            buttonInput(classes="pure-button  pure-button-primary") {
                                 id = "remove_${info.key}"
                                 value = "Remove"
                                 onClickFunction = { removeDictionary(info) }
@@ -155,6 +186,90 @@ fun initDictionaryTable(metadata : StorageMetadata)
             }
         }
     )
+}
+
+fun initYandexChoiceForm(
+    languages : List<LanguageChoices>, settings : YandexSettings) {
+    yandexChoice.innerHTML = ""
+
+    val langSourceFieldName = "yandexSourceLang"
+    val langTargetFieldName = "yandexTargetLang"
+
+
+    val targetChoices = languages.find { it.source == settings.sourceLang }?.targets ?: ArrayList()
+
+    yandexChoice.appendChild(document.create.div(classes = "pure-g") {
+        style = "width: 600px; line-height:40px"
+        div(classes = "pure-u-1-8") {
+            style="vertical-align: middle; text-align:right"
+            label {
+                htmlFor = langSourceFieldName
+                style="margin-right: 10px"
+                +"source" }
+        }
+        div(classes = "pure-u-1-4") {
+            select {
+                name = langSourceFieldName
+
+                for (lang in languages) {
+
+                    option {
+                        value = lang.source.toString()
+                        selected = settings.sourceLang == lang.source
+
+
+                        +lang.source.description
+
+                        onClickFunction = {
+                            settings.sourceLang = lang.source
+                            initYandexChoiceForm(languages, settings)
+                        }
+                    }
+
+                }
+
+            }
+        }
+        div(classes = "pure-u-1-8") {
+            style="vertical-align: middle; text-align:right"
+            label {
+                htmlFor = langTargetFieldName;
+                style="margin-right: 10px"
+                +"target" }
+        }
+        div(classes = "pure-u-1-4") {
+            select {
+                name = langTargetFieldName
+
+                for (lang in targetChoices) {
+
+                    option {
+                        value = lang.toString()
+                        selected = settings.targetLang == lang
+
+                        +lang.description
+
+                        onClickFunction = {
+                            settings.targetLang = lang
+                            initYandexChoiceForm(languages, settings)
+                        }
+                    }
+
+                }
+
+            }
+
+        }
+        div(classes = "pure-u-1-4") {
+            buttonInput(classes = "pure-button pure-button-primary") {
+                id = "submitYandexSettings"
+                value = "Submit"
+                onClickFunction = { updateYandexSettings(settings); }
+            }
+        }
+
+    })
+
 }
 
 
