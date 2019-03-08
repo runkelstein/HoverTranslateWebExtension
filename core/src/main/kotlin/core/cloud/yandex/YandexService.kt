@@ -22,11 +22,18 @@ object YandexService {
         private fun Pair<LanguageCode, LanguageCode>.toLangDirection(): String =
             this.first.name.toLowerCase() + "-" + this.second.name.toLowerCase()
 
+        private fun operation(operation: String) = BaseUrl + operation + "?key=${ApiKey}"
 
-        fun getLangs() = "${BaseUrl}getLangs?key=$ApiKey"
+        private fun param(param : String, value : String) = "&${param}=${value}"
+
+        fun getLangs() = operation("getLangs")
 
         fun translate(text: String, fromLang: LanguageCode, toLang: LanguageCode) =
-            "${BaseUrl}translate?key?${ApiKey}&text=$text&lang=${Pair(fromLang, toLang).toLangDirection()}"
+            operation("translate") +
+                    param("text", text) +
+                    param("lang", Pair(fromLang, toLang).toLangDirection())
+
+
     }
 
     private suspend fun<T> fetch(url : String, serializer: DeserializationStrategy<T>) : T {

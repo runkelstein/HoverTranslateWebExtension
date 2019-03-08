@@ -30,7 +30,7 @@ class DictCC(text : String) : IDictionary {
             val targetLangText = line.substringAfter(TABULATOR).substringBefore(TABULATOR)
 
             content.getOrPut(key) { ArrayList() }
-                .add(Translation(sourceLangText, targetLangText))
+                .add(Translation(sourceLangText, targetLangText, DictOriginType.DictCC))
         }
 
         // sort dictionary
@@ -41,9 +41,9 @@ class DictCC(text : String) : IDictionary {
         }
     }
 
-    override fun findTranslations(word: String): SearchResult
+    override suspend fun findTranslations(word: String): SearchResult
     {
         val results = content[word]?.toList() ?: ArrayList()
-        return SearchResult(word, results, DictOriginType.DictCC)
+        return SearchResult(word, results)
     }
 }

@@ -57,7 +57,7 @@ abstract class AbstractMessageService : IMessageService {
 
     }
 
-     override fun <T : CommandBase, R : Any> onReceive(action: (T) -> ResultDto<R>, commandClass : KClass<T>, resultClass : KClass<R>) {
+     override fun <T : CommandBase, R : Any> onReceive(action: suspend (T) -> ResultDto<R>, commandClass : KClass<T>, resultClass : KClass<R>) {
 
          GlobalScope.launch {
 

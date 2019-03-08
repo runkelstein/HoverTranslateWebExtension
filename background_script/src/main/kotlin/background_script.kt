@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import tabs.ActiveInfo
 import tabs.ChangeInfo
 import com.inspiritious.HoverTranslateWebExtension.core.Interop.api.onReceive
+import core.dictionaryLib.CombinedDict
 
 var isActive = false;
 
@@ -112,7 +113,7 @@ fun addListeners() {
     BackgroundMessageService.onReceive(::onTranslationRequest)
 }
 
-fun onTranslationRequest(cmd : RequestTranslationCommand) : ResultDto<SearchResult> {
+suspend fun onTranslationRequest(cmd : RequestTranslationCommand) : ResultDto<SearchResult> {
     console.log("translation request received")
     val searchResult = dictionary.findTranslations(cmd.searchTerm)
     return resultWithSuccess(searchResult)
@@ -128,7 +129,7 @@ fun loadDictionary() = GlobalScope.launch {
 
     val entry = StorageService.load(metaData.activated!!);
     if (entry!=null) {
-        dictionary = DictCC(entry.content)
+        dictionary = CombinedDict(entry.content,metaData.properties.yandex)
         val testWord = dictionary.findTranslations("vacanza")
         sendBrowserNotification("Dictionary initialized: " + testWord.results.first().targetLangText)
     } else {

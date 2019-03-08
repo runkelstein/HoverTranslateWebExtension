@@ -9,7 +9,7 @@ import kotlin.browser.window
 
 val overlay = Overlay()
 
-private fun onSwitchPlugin(cmd : SwitchPluginCommand) : SimpleResultDto {
+private suspend fun onSwitchPlugin(cmd : SwitchPluginCommand) : SimpleResultDto {
 
     console.log("received switch plugin with value: " + cmd.isEnabled)
     if (cmd.isEnabled) {

@@ -4,5 +4,5 @@ interface IDictionary
 {
     val description : String
 
-    fun findTranslations(word : String) : SearchResult
+    suspend fun findTranslations(word : String) : SearchResult
 }
