@@ -28,7 +28,7 @@ fun main(args: Array<String>) {
     }
     window.asDynamic().hasRun = true
 
-    ContentMessageService.onReceive(::onSwitchPlugin)
+    ContentMessageService.onReceive { cmd : SwitchPluginCommand -> onSwitchPlugin(cmd) }
 }
 
 

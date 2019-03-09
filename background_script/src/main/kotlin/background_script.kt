@@ -110,7 +110,7 @@ fun addListeners() {
     browser.browserAction.onClicked.addListener (::onToolbarButtonClicked)
     browser.tabs.onActivated.addListener (::onTabActivated)
     browser.tabs.onUpdated.addListener (::onTabUpdated)
-    BackgroundMessageService.onReceive(::onTranslationRequest)
+    BackgroundMessageService.onReceive{ cmd : RequestTranslationCommand -> onTranslationRequest(cmd) }
 }
 
 suspend fun onTranslationRequest(cmd : RequestTranslationCommand) : ResultDto<SearchResult> {
