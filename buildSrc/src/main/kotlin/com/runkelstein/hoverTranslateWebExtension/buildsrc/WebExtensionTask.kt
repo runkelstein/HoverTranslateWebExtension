@@ -23,6 +23,7 @@ open class WebExtensionTask : DefaultTask() {
         project.copy {
             from(project.buildDir.path + "/kotlin-js-min/main") {
                 include("*.js")
+                include("*.js.map")
             }
 
             into("$rootPath/$outputDir/$projectName")

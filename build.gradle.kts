@@ -7,7 +7,6 @@ version = "1.0-SNAPSHOT"
 
 
 plugins {
-    //kotlin("js") version "1.3.61" apply true
     id("kotlin2js") version "1.3.61" apply true
     id("kotlinx-serialization") version "1.3.61" apply true
 }
@@ -49,7 +48,7 @@ subprojects  {
         compileKotlin2Js {
             kotlinOptions {
                 sourceMap = true
-                //kotlinOptions.sourceMapEmbedSources = "always"
+                kotlinOptions.sourceMapEmbedSources = "always"
             }
         }
     }
