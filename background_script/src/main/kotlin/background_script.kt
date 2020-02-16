@@ -1,19 +1,18 @@
-package com.inspiritious.HoverTranslateWebExtension.background_script
+package com.runkelstein.hoverTranslateWebExtension.background_script
 
 import browserAction.Details3
-import com.inspiritious.HoverTranslateWebExtension.core.Interop.api.BackgroundMessageService
-import com.inspiritious.HoverTranslateWebExtension.core.Interop.api.IMessageService
-import com.inspiritious.HoverTranslateWebExtension.core.Interop.api.send
-import com.inspiritious.HoverTranslateWebExtension.core.Interop.commands.RequestTranslationCommand
-import com.inspiritious.HoverTranslateWebExtension.core.Interop.commands.SwitchPluginCommand
-import com.inspiritious.HoverTranslateWebExtension.core.Interop.dto.DeferredSimpleResult
-import com.inspiritious.HoverTranslateWebExtension.core.Interop.dto.ResultDto
-import com.inspiritious.HoverTranslateWebExtension.core.Interop.dto.resultWithSuccess
-import com.inspiritious.HoverTranslateWebExtension.core.dictionaryLib.DictCC
-import com.inspiritious.HoverTranslateWebExtension.core.dictionaryLib.IDictionary
-import com.inspiritious.HoverTranslateWebExtension.core.dictionaryLib.SearchResult
-import com.inspiritious.HoverTranslateWebExtension.core.storage.StorageService
-import com.inspiritious.HoverTranslateWebExtension.core.utils.await
+import com.runkelstein.hoverTranslateWebExtension.core.Interop.api.BackgroundMessageService
+import com.runkelstein.hoverTranslateWebExtension.core.Interop.api.IMessageService
+import com.runkelstein.hoverTranslateWebExtension.core.Interop.api.send
+import com.runkelstein.hoverTranslateWebExtension.core.Interop.commands.RequestTranslationCommand
+import com.runkelstein.hoverTranslateWebExtension.core.Interop.commands.SwitchPluginCommand
+import com.runkelstein.hoverTranslateWebExtension.core.Interop.dto.DeferredSimpleResult
+import com.runkelstein.hoverTranslateWebExtension.core.Interop.dto.ResultDto
+import com.runkelstein.hoverTranslateWebExtension.core.Interop.dto.resultWithSuccess
+import com.runkelstein.hoverTranslateWebExtension.core.dictionaryLib.IDictionary
+import com.runkelstein.hoverTranslateWebExtension.core.dictionaryLib.SearchResult
+import com.runkelstein.hoverTranslateWebExtension.core.storage.StorageService
+import com.runkelstein.hoverTranslateWebExtension.core.utils.await
 import extensionTypes.InjectDetails
 import notifications.CreateNotificationOptions
 import tabs.Tab
@@ -22,8 +21,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tabs.ActiveInfo
 import tabs.ChangeInfo
-import com.inspiritious.HoverTranslateWebExtension.core.Interop.api.onReceive
-import core.dictionaryLib.CombinedDict
+import com.runkelstein.hoverTranslateWebExtension.core.Interop.api.onReceive
+import com.runkelstein.hoverTranslateWebExtension.core.dictionaryLib.CombinedDict
 
 var isActive = false;
 
@@ -129,7 +128,10 @@ fun loadDictionary() = GlobalScope.launch {
 
     val entry = StorageService.load(metaData.activated!!);
     if (entry!=null) {
-        dictionary = CombinedDict(entry.content,metaData.properties.yandex)
+        dictionary = CombinedDict(
+            entry.content,
+            metaData.properties.yandex
+        )
         val testWord = dictionary.findTranslations("vacanza")
         sendBrowserNotification("Dictionary initialized: " + testWord.results.first().targetLangText)
     } else {

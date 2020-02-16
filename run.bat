@@ -1,0 +1,1 @@
+web-ext run --firefox-profile=dev --source-dir=out

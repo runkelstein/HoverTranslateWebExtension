@@ -1,24 +1,21 @@
-import com.inspiritious.HoverTranslateWebExtension.*
+import com.runkelstein.hoverTranslateWebExtension.buildsrc.*
+import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinJsDce
 
-group = "com.inspiritious.HoverTranslateWebExtension"
+group = "com.runkelstein.hoverTranslateWebExtension"
 version = "1.0-SNAPSHOT"
 
+
 plugins {
-    id("kotlin2js") version Versions.kotlin apply true
-    id("kotlinx-serialization") version Versions.kotlin apply true
-    `build-scan`
+    //kotlin("js") version "1.3.61" apply true
+    id("kotlin2js") version "1.3.61" apply true
+    id("kotlinx-serialization") version "1.3.61" apply true
 }
 
 repositories {
     jcenter()
     mavenCentral()
     maven("https://www.jitpack.io")
-}
-
-buildScan {
-    termsOfServiceUrl = "https://gradle.com/terms-of-service"
-    termsOfServiceAgree = "yes"
-    publishAlways()
 }
 
 apply {
@@ -29,8 +26,8 @@ apply {
 subprojects  {
 
     apply {
-        plugin("kotlin-dce-js")
         plugin("kotlin2js")
+        plugin("kotlin-dce-js")
         plugin("kotlinx-serialization")
     }
 
@@ -42,17 +39,17 @@ subprojects  {
     }
 
     dependencies {
-        compile(kotlin("stdlib-js", Versions.kotlin))
-        compile("com.github.cypressious.kotlin-webextensions-declarations", "webextensions-declarations", Versions.kotlinWebextensions)
-        compile("org.jetbrains.kotlinx", "kotlinx-serialization-runtime-js", Versions.kotlinxSerialization)
-        compile("org.jetbrains.kotlinx", "kotlinx-coroutines-core-js", Versions.kotlinxCoroutines)
+        implementation(kotlin("stdlib-js", Versions.kotlin))
+        implementation("com.github.cypressious.kotlin-webextensions-declarations", "webextensions-declarations", Versions.kotlinWebextensions)
+        implementation("org.jetbrains.kotlinx", "kotlinx-serialization-runtime-js", Versions.kotlinxSerialization)
+        implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core-js", Versions.kotlinxCoroutines)
     }
 
     tasks {
         compileKotlin2Js {
             kotlinOptions {
                 sourceMap = true
-                kotlinOptions.sourceMapEmbedSources = "always"
+                //kotlinOptions.sourceMapEmbedSources = "always"
             }
         }
     }
@@ -74,7 +71,7 @@ allprojects {
         }
 
         dependencies {
-            compile("org.jetbrains.kotlinx","kotlinx-html-js", Versions.kotlinxHtml)
+            implementation("org.jetbrains.kotlinx","kotlinx-html-js", Versions.kotlinxHtml)
             implementation(project(":core"))
         }
     }
